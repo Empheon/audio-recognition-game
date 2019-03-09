@@ -53,3 +53,10 @@ sysinfo.txt
 
 # Crashlytics generated file
 crashlytics-build.properties
+
+###################################
+# Custom
+###################################
+
+Assets/ML-Agents/Examples/
+Assets/ML-Agents/Plugins/

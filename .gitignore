@@ -118,3 +118,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+###################################
+# Custom
+###################################
+
+*.meta
+*.index
+*.chkp.*
+*.pbtxt
+checkpoint
