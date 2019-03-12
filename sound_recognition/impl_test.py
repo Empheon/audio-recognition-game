@@ -25,11 +25,11 @@ testOutputPath = 'out'
 
 GRAPH_NAME = 'sound_recognition_graph'
 
-X_train = np.array([[1, 2, 3], [1, 2, 3], [1, 2, 3]])
+X_train = np.array([[1, 2, 3, 4], [4, 5, 6, 7], [15, 40, 2, 0]])
 y_train = np.array([1, 2, 3])
-y_train = to_categorical(y_train)
-X_test = np.array([[1, 2, 3], [1, 2, 3], [1, 2, 3]])
-y_test = np.array([1, 2, 3])
+# y_train = to_categorical(y_train)
+X_test = np.array([[1, 2, 3, 4], [15, 40, 2, 0], [4, 5, 6, 7]])
+y_test = np.array([1, 3, 2])
 y_test = to_categorical(y_test)
 
 
@@ -73,13 +73,24 @@ def export_model(saver, input_node_names, output_node_name, session, outputPath)
 
 
 with tf.Session() as sess:
+    for i in range(0, 10):
+        X_train = np.append(X_train, X_train, axis=0)
+        y_train = np.append(y_train, y_train, axis=0)
+    
+    print(y_train.shape)
+    y_train = to_categorical(y_train)
+    print(X_train.shape)
+    print(y_train.shape)
+
+    print(X_test.shape)
+    print(y_test.shape)
     # note that we can name any layer by passing it a "name" argument.
-    main_input = Input(shape=(3,), dtype='int32', name='input_node')
-    K.placeholder(shape=(3), name="input_placeholder_x")
+    main_input = Input(shape=(4,), dtype='int32', name='input_node')
+    K.placeholder(shape=(4), name="input_placeholder_x")
 
     # this embedding layer will encode the input sequence
     # into a sequence of dense 512-dimensional vectors.
-    x = Embedding(output_dim=512, input_dim=10000, input_length=3)(main_input)
+    x = Embedding(output_dim=512, input_dim=10000, input_length=4)(main_input)
 
     # a LSTM will transform the vector sequence into a single vector,
     # containing information about the entire sequence
