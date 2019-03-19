@@ -14,11 +14,12 @@ from keras.layers.core import Dense, Activation, Flatten
 
 #----------------loading data
 X0 = []
+XS =[]
 y = []
 FS = []
 clas = 0
 max_size = 0
-labels = ['clap', 'keys']
+labels = ['clap', 'keys','silence']
 for label in labels:
     for idx in range(1,31):
         fs, x = wavfile.read(label + '/' + label + '_' + str(idx) + '.wav')
@@ -26,9 +27,12 @@ for label in labels:
             max_size = x.size
         #stereo
         x = x[:,0]
-        FS.append(fs)
-        y.append(clas)
-        X0.append(x)
+        if label == 'silence':
+            XS.append(x)
+        else: 
+            X0.append(x)
+            FS.append(fs)
+            y.append(clas)
     clas = clas + 1
 #put zeros
 X = []
@@ -63,13 +67,31 @@ for sample_idx in range(0, np.size(X0)):
             X_split.append(sample[frame_idx * frame_length: (frame_idx + 1) * frame_length])
             y_split.append(y[sample_idx])
 
+XS_split = []
+ys_split = []        
+for sample_idx in range(0, np.size(XS)):
+    sample_silence = XS[sample_idx]
+    print('frame iterations for sample', sample_idx,':',int(len(sample) / frame_length))
+    print('length', len(sample))
+    for frame_idx in range(0, int(len(sample) / frame_length)):
+        if (len(sample) >= (frame_idx + 1) * frame_length):
+            XS_split.append(sample[frame_idx * frame_length: (frame_idx + 1) * frame_length])
+            ys_split.append([0,0])
+           
+ 
 # print(X_split)
-
 X_split = np.array(X_split).astype(float)
 y_split = np.array(y_split)
 FS = np.array(FS)
 X_split = np.expand_dims(X_split,2)
 y_split = to_categorical(y_split)
+XS_split = np.array(XS_split).astype(float)
+XS_split = np.expand_dims(XS_split,2)
+ys_split = np.array(ys_split) 
+
+#concatenate silence to other samples
+X_split = np.concatenate((X_split,XS_split[:400]), axis = 0)
+y_split = np.concatenate((y_split,ys_split[:400]), axis = 0)
 
 for a in range(0, 10):
     X_train, X_test, y_train, y_test = train_test_split(X_split, y_split, test_size=0.2)
