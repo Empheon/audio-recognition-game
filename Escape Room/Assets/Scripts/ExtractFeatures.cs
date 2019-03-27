@@ -38,7 +38,7 @@ public class ExtractFeatures : MonoBehaviour {
 
         _samples = new List<double[]>();
         _classes = new List<string>();
-        MelFrequencyCepstrumCoefficient mfcc = new MelFrequencyCepstrumCoefficient();
+        MelFrequencyCepstrumCoefficient mfcc = new MelFrequencyCepstrumCoefficient(lowerFrequency: 20, upperFrequency: 8000, windowLength: 0.04, frameRate: 50);
         foreach (var label in _labels) {
             AudioClip c = Resources.Load<AudioClip>("data/" + label + "_16");
             Debug.Log(c);
@@ -78,10 +78,19 @@ public class ExtractFeatures : MonoBehaviour {
                     var spectrogram = mfcc.Transform(audio).ToArray();
                     string outputMatrix = "";
 
-                    for (int i = 0; i < spectrogram.Length; i++)
-                    {
-                        outputMatrix += string.Join(";", Array.ConvertAll(spectrogram[i].Descriptor, Convert.ToString)) + "\n";
+                    for (int i = 0; i < 13; i++) {
+                        for (int k = 0; k < 50; k++)
+                        {
+                            outputMatrix += spectrogram[k].Descriptor[i].ToString().Replace(',', '.');
+                            if (k != 49)
+                            {
+                                outputMatrix += ";";
+                            }
+                        }
+                        outputMatrix += "\n";
                     }
+                    //outputMatrix += string.Join(";", Array.ConvertAll<double, string>(d, Convert.ToString)).Replace(',', '.') + "\n";
+
                     File.WriteAllText(rootFolder + label + "_" + counter++ + "_features.csv", outputMatrix);
                 }
             }
