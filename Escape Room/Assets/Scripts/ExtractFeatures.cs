@@ -1,29 +1,21 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Comirva.Audio;
-using TensorFlow;
 using UnityEngine;
-
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
-using NAudio.Wave;
-//using NAudio.Dsp;
 using Accord.Math;
 using Accord.Audio;
-using Accord.DirectSound;
-using Accord;
 
+/// <summary>
+/// OBSELETE: was used when using records from Audacity
+/// </summary>
 public class ExtractFeatures : MonoBehaviour {
     private List<double[]> _samples;
     private List<string> _classes;
 
     private int _frameLenght = 16000;
 
-    private string[] _labels = new[] { "keys", "clap" };
+    private string[] _labels = new[] { "keys", "clap", "water" };
     private string rootFolder = @"D:\_Documents\#_Cours_TUT_2018_2019\Innovation Project\audio-recognition-game\sound_recognition\extracted_data\";
     // Start is called before the first frame update
     void Start() {
@@ -38,7 +30,8 @@ public class ExtractFeatures : MonoBehaviour {
 
         _samples = new List<double[]>();
         _classes = new List<string>();
-        MelFrequencyCepstrumCoefficient mfcc = new MelFrequencyCepstrumCoefficient(lowerFrequency: 20, upperFrequency: 8000, windowLength: 0.04, frameRate: 50);
+        MelFrequencyCepstrumCoefficient mfcc = new MelFrequencyCepstrumCoefficient(lowerFrequency: 20, 
+            upperFrequency: 8000, windowLength: 0.04, frameRate: 50, numberOfBins: 2048);
         foreach (var label in _labels) {
             AudioClip c = Resources.Load<AudioClip>("data/" + label + "_16");
             Debug.Log(c);
@@ -73,12 +66,12 @@ public class ExtractFeatures : MonoBehaviour {
                     _classes.Add(label);
                 }
 
-                if (d.Max() > 0.15) {
+                if (d.Max() > 0.1) {
                     Signal audio = Signal.FromArray(d, 16000);
                     var spectrogram = mfcc.Transform(audio).ToArray();
                     string outputMatrix = "";
 
-                    for (int i = 0; i < 13; i++) {
+                    for (int i = 1; i < 13; i++) {
                         for (int k = 0; k < 50; k++)
                         {
                             outputMatrix += spectrogram[k].Descriptor[i].ToString().Replace(',', '.');
@@ -89,7 +82,6 @@ public class ExtractFeatures : MonoBehaviour {
                         }
                         outputMatrix += "\n";
                     }
-                    //outputMatrix += string.Join(";", Array.ConvertAll<double, string>(d, Convert.ToString)).Replace(',', '.') + "\n";
 
                     File.WriteAllText(rootFolder + label + "_" + counter++ + "_features.csv", outputMatrix);
                 }
